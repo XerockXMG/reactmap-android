@@ -1,6 +1,5 @@
 package be.mygod.reactmap
 
-import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -11,11 +10,11 @@ import android.system.Os
 import android.system.OsConstants
 import android.view.WindowManager
 import android.webkit.WebView
-import android.widget.Switch
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.edit
+import androidx.core.content.res.use
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
@@ -28,6 +27,8 @@ import be.mygod.reactmap.util.UnblockCentral
 import be.mygod.reactmap.util.UpdateChecker
 import be.mygod.reactmap.util.readableMessage
 import be.mygod.reactmap.webkit.ReactMapFragment
+import com.google.android.material.materialswitch.MaterialSwitch
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -57,11 +58,13 @@ class MainActivity : FragmentActivity() {
         if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true)
         setContentView(R.layout.layout_main)
         handleIntent(intent)
-        if (currentFragment == null) reactMapFragment(null)
-        if (app.pref.getBoolean(KEY_WELCOME, true)) {
-            startConfigure(true)
-            app.pref.edit { putBoolean(KEY_WELCOME, false) }
-        }
+        if (savedInstanceState == null) {
+            reactMapFragment()
+            if (app.pref.getBoolean(KEY_WELCOME, true)) {
+                startConfigure(true)
+                app.pref.edit { putBoolean(KEY_WELCOME, false) }
+            }
+        } else currentFragment = supportFragmentManager.findFragmentById(R.id.content) as ReactMapFragment?
         AlertDialogFragment.setResultListener<ConfigDialogFragment, Empty>(this) { which, _ ->
             if (which != DialogInterface.BUTTON_POSITIVE) return@setResultListener
             currentFragment?.terminate()
@@ -102,10 +105,10 @@ class MainActivity : FragmentActivity() {
             } catch (e: IOException) {
                 Timber.d(e)
             }
-            reactMapFragment(null)
+            reactMapFragment()
         }
         supportFragmentManager.setFragmentResultListener("ReactMapFragment", this) { _, _ ->
-            reactMapFragment(null)
+            reactMapFragment()
         }
         lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.STARTED) { UpdateChecker.check() } }
     }
@@ -114,9 +117,10 @@ class MainActivity : FragmentActivity() {
         handleIntent(intent)
     }
 
-    private var currentFragment: ReactMapFragment? = null
-    private fun reactMapFragment(overrideUri: Uri?) = supportFragmentManager.commit {
-        replace(R.id.content, ReactMapFragment(overrideUri).also { currentFragment = it })
+    var currentFragment: ReactMapFragment? = null
+    var pendingOverrideUri: Uri? = null
+    private fun reactMapFragment() = supportFragmentManager.commit {
+        replace(R.id.content, ReactMapFragment().also { currentFragment = it })
     }
 
     private fun handleIntent(intent: Intent?) {
@@ -127,9 +131,14 @@ class MainActivity : FragmentActivity() {
             ACTION_RESTART_GAME -> AlertDialog.Builder(this).apply {
                 setTitle(R.string.restart_game_dialog_title)
                 setMessage(R.string.restart_game_dialog_message)
-                val switch = Switch(this@MainActivity).apply {
+                val switch = MaterialSwitch(this@MainActivity).apply {
                     setText(R.string.pip_phone_enter_split)
                     isChecked = isInMultiWindowMode
+                    val padding = context.obtainStyledAttributes(intArrayOf(
+                        com.google.android.material.R.attr.dialogPreferredPadding)).use {
+                        it.getDimensionPixelOffset(0, 0)
+                    }
+                    setPadding(padding, 0, padding, 0)
                 }
                 setView(switch)
                 setPositiveButton(R.string.restart_game_standard) { _, _ ->
@@ -140,10 +149,7 @@ class MainActivity : FragmentActivity() {
                 }
                 setNeutralButton(android.R.string.cancel, null)
             }.show()
-            Intent.ACTION_VIEW -> {
-                val currentFragment = currentFragment
-                if (currentFragment == null) reactMapFragment(intent.data) else currentFragment.handleUri(intent.data)
-            }
+            Intent.ACTION_VIEW -> if (currentFragment?.handleUri(intent.data) != true) pendingOverrideUri = intent.data
         }
     }
     private fun startConfigure(welcome: Boolean) = ConfigDialogFragment().apply {
@@ -165,7 +171,7 @@ class MainActivity : FragmentActivity() {
             } catch (e: Exception) {
                 Timber.w(e)
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, e.readableMessage, Toast.LENGTH_LONG).show()
+                    Snackbar.make(findViewById(android.R.id.content), e.readableMessage, Snackbar.LENGTH_LONG).show()
                 }
             }
         }
