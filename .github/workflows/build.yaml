@@ -53,7 +53,7 @@ jobs:
     - name: Git Submodule Update
       run: |
         git pull --recurse-submodules
-        git submodule update --remote --recursive
+        git submodule update --init --recursive
 
     - name: Set up JDK
       uses: actions/setup-java@v2
