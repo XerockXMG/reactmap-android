@@ -94,16 +94,23 @@ jobs:
     - name: Rename Artifact
       run: mv /home/runner/work/reactmap-android/reactmap-android/app/build/outputs/apk/release/app-release.apk /home/runner/work/reactmap-android/reactmap-android/app/build/outputs/apk/release/${{ secrets.APP_NAME }}-v${{ env.VERSION_NAME }}.apk
 
+    - name: Rename all APK variant files
+      run: |
+        cd /home/runner/work/reactmap-android/reactmap-android/app/build/outputs/apk/release
+        for f in app-*-release.apk; do
+          new_name="${f/app/${{ secrets.APP_NAME }}-v${{ env.VERSION_NAME }}}"
+          mv "$f" "$new_name"
+        done
 
     - name: Release with ncipollo/release-action
       id: release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: /home/runner/work/reactmap-android/reactmap-android/app/build/outputs/apk/release/${{ secrets.APP_NAME }}-v${{ env.VERSION_NAME }}.apk
+        artifacts: /home/runner/work/reactmap-android/reactmap-android/app/build/outputs/apk/release/${{ secrets.APP_NAME }}-v${{ env.VERSION_NAME }}-*-release.apk
         token: ${{ secrets.GITHUB_TOKEN }}
         generateReleaseNotes: true
         skipIfReleaseExists: true
-        tag: v${{ env.VERSION_NAME}}
+        tag: v${{ env.VERSION_NAME }}
 
     - name: Send Discord webhook notification
       if: env.DISCORD_WEBHOOK_URL && steps.release.outputs.release_created == 'true'
