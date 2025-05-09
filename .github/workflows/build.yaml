@@ -81,7 +81,7 @@ jobs:
       run: ls -R /home/runner/work/reactmap-android/reactmap-android/app/build/outputs/apk/
       
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4.6.2
       with:
         name: Reactmap-android
         path: /home/runner/work/reactmap-android/reactmap-android/app/build/outputs/apk/release/app-release.apk
