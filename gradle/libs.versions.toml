@@ -1,47 +1,32 @@
 [versions]
-activity = "1.8.2"
-agp = "8.3.1"
-androidx-test-ext-junit = "1.1.5"
-browser = "1.8.0"
-core = "1.12.0"
-crashlytics = "2.9.9"
-desugar = "2.0.4"
-espresso-core = "3.5.1"
-firebase = "32.7.4"
-fragment = "1.6.2"
-hiddenapibypass = "4.3"
-junit = "4.13.2"
-kotlin = "1.9.23"
-lifecycle = "2.7.0"
-google-services = "4.4.1"
-material = "1.11.0"
-play-services-location = "21.2.0"
-timber = "5.0.1"
-work = "2.9.0"
-gradle-versions = "0.51.0"
+shizuku = "13.1.5"
 
 [libraries]
-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
-androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core" }
-desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+activity = "androidx.activity:activity:1.10.1"
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version = "1.2.1" }
+browser = "androidx.browser:browser:1.8.0"
+core-i18n = "androidx.core:core-i18n:1.0.0"
+core-ktx = "androidx.core:core-ktx:1.16.0"
+desugar = "com.android.tools:desugar_jdk_libs:2.1.5"
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version = "3.6.1" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase" }
+firebase-bom = "com.google.firebase:firebase-bom:33.13.0"
 firebase-crashlytics-ndk = { group = "com.google.firebase", name = "firebase-crashlytics-ndk" }
-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment" }
-hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version.ref = "hiddenapibypass" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-lifecycle-common = { group = "androidx.lifecycle", name = "lifecycle-common", version.ref = "lifecycle" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "play-services-location" }
-timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
-work = { group = "androidx.work", name = "work-runtime", version.ref = "work" }
+fragment-ktx = "androidx.fragment:fragment-ktx:1.8.6"
+hiddenapibypass = "org.lsposed.hiddenapibypass:hiddenapibypass:6.1"
+junit = { group = "junit", name = "junit", version = "4.13.2" }
+lifecycle-common = { group = "androidx.lifecycle", name = "lifecycle-common", version = "2.8.7" }
+material = { group = "com.google.android.material", name = "material", version = "1.12.0" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version = "21.3.0" }
+s2-geometry = "com.google.geometry:s2-geometry:2.0.0"
+shizuku-api = { group = "dev.rikka.shizuku", name = "api", version.ref = "shizuku" }
+shizuku-provider = { group = "dev.rikka.shizuku", name = "provider", version.ref = "shizuku" }
+timber = { group = "com.jakewharton.timber", name = "timber", version = "5.0.1" }
+work = "androidx.work:work-runtime:2.10.1"
 
 [plugins]
-androidApplication = { id = "com.android.application", version.ref = "agp" }
-firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
-googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-gradleVersions = { id = "com.github.ben-manes.versions", version.ref = "gradle-versions" }
+androidApplication = "com.android.application:8.10.0"
+firebaseCrashlytics = "com.google.firebase.crashlytics:3.0.3"
+googleServices = { id = "com.google.gms.google-services", version = "4.4.2" }
+kotlinAndroid = "org.jetbrains.kotlin.android:2.1.20"
+gradleVersions = "com.github.ben-manes.versions:0.52.0"

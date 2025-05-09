@@ -8,18 +8,22 @@ import android.app.NotificationManager
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import android.os.Process
+import android.os.UserHandle
 import android.os.UserManager
 import android.os.ext.SdkExtensions
 import android.util.Log
+import android.webkit.WebView
 import android.widget.Toast
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.getSystemService
+import androidx.work.Configuration
 import androidx.work.WorkManager
+import be.mygod.reactmap.auto.CarSiteController
 import be.mygod.reactmap.follower.BackgroundLocationReceiver
 import be.mygod.reactmap.follower.LocationSetter
 import be.mygod.reactmap.util.DeviceStorageApp
-import be.mygod.reactmap.util.UpdateChecker
 import be.mygod.reactmap.webkit.SiteController
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.color.DynamicColors
@@ -27,6 +31,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
+import kotlinx.coroutines.Dispatchers
 import timber.log.Timber
 
 class App : Application() {
@@ -43,6 +48,7 @@ class App : Application() {
     val fusedLocation by lazy { LocationServices.getFusedLocationProviderClient(deviceStorage) }
     val nm by lazy { getSystemService<NotificationManager>()!! }
     val userManager by lazy { getSystemService<UserManager>()!! }
+    val userId by lazy { UserHandle.getUserHandleForUid(Process.myUid()).hashCode() }
 
     val activeUrl get() = pref.getString(KEY_ACTIVE_URL, null) ?: "https://${BuildConfig.DEFAULT_DOMAIN}"
 
@@ -57,6 +63,10 @@ class App : Application() {
         FirebaseCrashlytics.getInstance().apply {
             setCustomKey("applicationId", BuildConfig.APPLICATION_ID)
             setCustomKey("build", Build.DISPLAY)
+            WebView.getCurrentWebViewPackage()?.let {
+                setCustomKey("webview", it.packageName)
+                setCustomKey("webviewVersion", it.versionName.toString())
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) setCustomKey("extension_s",
                 SdkExtensions.getExtensionVersion(Build.VERSION_CODES.S))
         }
@@ -82,6 +92,11 @@ class App : Application() {
                 lockscreenVisibility = Notification.VISIBILITY_SECRET
                 setShowBadge(false)
             },
+            NotificationChannel(CarSiteController.CHANNEL_ID,
+                getText(R.string.notification_channel_car_site_controller), NotificationManager.IMPORTANCE_LOW).apply {
+                lockscreenVisibility = Notification.VISIBILITY_SECRET
+                setShowBadge(false)
+            },
             NotificationChannel(LocationSetter.CHANNEL_ID, getText(R.string.notification_channel_webhook_updating),
                 NotificationManager.IMPORTANCE_LOW).apply {
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
@@ -96,14 +111,12 @@ class App : Application() {
                 enableLights(true)
                 lightColor = getColor(R.color.main_orange)
             },
-        ).apply {
-            if (BuildConfig.GITHUB_RELEASES != null) add(NotificationChannel(UpdateChecker.CHANNEL_ID,
-                getText(R.string.notification_channel_update_available), NotificationManager.IMPORTANCE_HIGH).apply {
-                enableLights(true)
-                lightColor = getColor(R.color.main_blue)
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            })
-        })
+        ))
+        nm.deleteNotificationChannel("updateAvailable")
+        WorkManager.initialize(deviceStorage, Configuration.Builder().apply {
+            setWorkerCoroutineContext(Dispatchers.IO)
+            if (BuildConfig.DEBUG) setMinimumLoggingLevel(Log.VERBOSE)
+        }.build())
         work = WorkManager.getInstance(deviceStorage)
         BackgroundLocationReceiver.setup()
         DynamicColors.applyToActivitiesIfAvailable(this)

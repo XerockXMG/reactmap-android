@@ -7,10 +7,14 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/58a48b28278d46edad1b5c82bf648607)](https://app.codacy.com/gh/Mygod/reactmap-android/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![License](https://img.shields.io/github/license/Mygod/reactmap-android.svg)](LICENSE)
 
+[![Get it on Obtainium](https://github.com/ImranR98/Obtainium/blob/main/assets/graphics/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Mygod/reactmap-android)
+
 Use ReactMap as an Android app with battery improvements, including:
 
 * Use Google location services to follow location.
 * Reduce animations.
+* Pause location following when jumping to a new location.
+* Disable popups from automatically panning the map.
 
 Other features:
 
@@ -19,6 +23,7 @@ Other features:
 * Login button is clicked automatically (Discord login only).
 * You could make alerts follow location in background.
 * Handle links to the map without opening a new tab (requires custom build for custom domains).
+* Compressed graphql payload to save bandwidth.
 
 For best experiences, ReactMap should be updated to this commit or later:
 https://github.com/WatWowMap/ReactMap/commit/addb5f3b27c49fe9d7165c8b76f54a5b10912f67
@@ -67,10 +72,3 @@ See `gradle.properties` for a complete list of supported properties.
 An alternative to using `-P` switches is to adding your properties to the `gradle.properties` file in the root directory.
 
 Success! Find your apk in `app/build/outputs/apk/release`.
-
-### Support in-app GitHub update checking
-
-In-app update checking is supported if you use your custom GitHub repository to distribute built apks.
-To do this, it is required to use a release name of format `[v]X.Y.Z` with an arbitrary optional suffix followed by `-`.
-The app version name should follow the same format (usually without `v` prefix), and the `X,Y,Z` in the version name will be compared to determine the latest update.
-You may configure this by using properties `reactmap.versionCode,reactmap.versionName,reactmap.githubReleases` (see `gradle.properties` for details).
